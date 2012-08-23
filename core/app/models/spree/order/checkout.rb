@@ -20,12 +20,14 @@ module Spree
           def self.define_state_machine!
             self.checkout_steps = []
             @checkout_steps = ActiveSupport::OrderedHash.new
-            self.next_event_transitions = []
+            self.next_event_transitions.clear
             self.previous_states = [:cart]
             instance_eval(&checkout_flow)
             klass = self
 
             state_machine :state, :initial => :cart do
+              events[:next].reset if events[:next]
+
               klass.next_event_transitions.each { |t| transition(t.merge(:on => :next)) }
 
               # Persist the state on the order
